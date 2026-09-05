@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Current stage:** Stage 2 complete; awaiting review
-- **Next stage:** Stage 3 — Bayesian belief simulation
+- **Current stage:** Stage 3 complete; awaiting review
+- **Next stage:** Stage 4 — decision costs + policy
 - **Required blocker:** None; `data/credit_card_fraud_10k.csv` is present
-- **Implementation started:** Stages 1–2
-- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `d7b9af3`
+- **Implementation started:** Stages 1–3
+- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `621e4e9`
 - **Raw dataset modified:** No
 - **Last updated:** 2026-09-05
 
@@ -79,6 +79,16 @@ At every arrow, the project should preserve enough intermediate values for a beg
 Evidence count inside each state ──> likelihood P(evidence | state)
 ```
 
+### Stage 3 belief map
+
+```text
+Prior belief
+    ↓ EARLY_HOUR=True
+Posterior: LEGITIMATE 0.949491, FRAUDULENT 0.050509
+    ↓ FOREIGN_TRANSACTION=False
+Posterior: LEGITIMATE 0.973956, FRAUDULENT 0.026044
+```
+
 ### Stage 1 — Dataset inspection + project definition
 
 **Outcome:** Confirmed the CSV schema, created the five binary evidence definitions in the notebook, and documented hidden states plus selected/excluded columns.
@@ -99,7 +109,7 @@ Evidence count inside each state ──> likelihood P(evidence | state)
 
 ### Stage 3 — Bayesian belief simulation
 
-**Outcome:** Create the notebook and show sequential updates for True and False evidence, including normalization and a manually traceable example.
+**Outcome:** Extended the notebook with sequential updates for True and False evidence, explicit normalization, and a manually traceable two-observation example.
 
 **Commit:** `build Bayesian credit card fraud belief simulation`
 

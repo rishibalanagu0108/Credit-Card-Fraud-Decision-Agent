@@ -170,7 +170,7 @@ These rules are **DESIGN ASSUMPTIONS**. They create binary observations; they ar
 | `LOW_DEVICE_TRUST` | `device_trust_score < 50` | The device trust score is below 50. |
 | `HIGH_VELOCITY` | `velocity_last_24h >= 3` | At least 3 recent transactions are recorded in the 24-hour velocity field. |
 
-The exact boundary choices (`<= 5`, `< 50`, and `>= 3`) are V1 design choices. Stage 2 will calculate how often each resulting evidence variable occurs for each historical hidden state.
+The exact boundary choices (`<= 5`, `< 50`, and `>= 3`) are V1 design choices. Stage 2 calculated how often each resulting evidence variable occurs for each historical hidden state.
 
 ### Visual: raw columns becoming evidence
 
@@ -182,7 +182,7 @@ device_trust_score     --(< 50)-->  LOW_DEVICE_TRUST
 velocity_last_24h      --(>= 3)-->  HIGH_VELOCITY
 ```
 
-The arrows above are feature-engineering rules. They do not say how likely fraud is. Stage 2 will estimate those probabilities from rows grouped by `is_fraud`.
+The arrows above are feature-engineering rules. They do not say how likely fraud is. Stage 2 estimated those probabilities from rows grouped by `is_fraud`.
 
 ### Visual: the Week 1 reasoning pipeline
 
@@ -209,6 +209,77 @@ Inspect data
     -> Analyze failures
     -> Record one complete decision
 ```
+
+## Stage 3: Sequential Bayesian belief update
+
+### Visual: one evidence item at a time
+
+```mermaid
+flowchart TD
+    B[Current belief] --> M[Multiply by P(observation | state)]
+    M --> U[Unnormalized values]
+    U --> N[Divide by total normalizer]
+    N --> P[New posterior; sums to 1]
+    P --> B
+```
+
+Plain-text version:
+
+```text
+Current belief
+      |
+      v
+belief × matching likelihood
+      |
+      v
+unnormalized LEGITIMATE and FRAUDULENT values
+      |
+      v
+divide both by their sum
+      |
+      v
+new posterior belief
+```
+
+The notebook keeps the likelihood lookup, multiplication, normalization, and example trace visible as separate steps. This makes the calculation inspectable instead of hiding it inside one large function.
+
+### Example trace using the initially revealed evidence
+
+The example begins with the Stage 2 priors:
+
+```text
+LEGITIMATE = 0.984900
+FRAUDULENT = 0.015100
+```
+
+First observation: `EARLY_HOUR=True`.
+
+```text
+LEGITIMATE unnormalized = 0.984900 × 0.236674 = 0.233100
+FRAUDULENT unnormalized = 0.015100 × 0.821192 = 0.012400
+normalizer = 0.233100 + 0.012400 = 0.245500
+
+P(LEGITIMATE | EARLY_HOUR=True) = 0.949491
+P(FRAUDULENT | EARLY_HOUR=True) = 0.050509
+```
+
+Second observation: `FOREIGN_TRANSACTION=False`. The false-evidence likelihoods are complements:
+
+```text
+P(FOREIGN_TRANSACTION=False | LEGITIMATE) = 0.909026
+P(FOREIGN_TRANSACTION=False | FRAUDULENT) = 0.456954
+```
+
+```text
+LEGITIMATE unnormalized = 0.949491 × 0.909026 = 0.863112
+FRAUDULENT unnormalized = 0.050509 × 0.456954 = 0.023080
+normalizer = 0.863112 + 0.023080 = 0.886192
+
+P(LEGITIMATE | both observations) = 0.973956
+P(FRAUDULENT | both observations) = 0.026044
+```
+
+The final posterior still sums to 1. No action is selected in Stage 3; action selection begins in Stage 4.
 
 ## Stage 1 verification output
 
@@ -238,7 +309,6 @@ HIGH_VELOCITY: 3,266 true
 
 ## Not implemented yet
 
-- Bayesian posterior updates
 - Decision costs and uncertainty margin
 - Agent action selection
 - Held-out evaluation
