@@ -14,6 +14,94 @@ Build a beginner-friendly Week 1 agent using historical probabilities, sequentia
 
 The raw dataset is `data/credit_card_fraud_10k.csv`. Stage 1 verification found 10,000 rows, all expected columns, and zero missing values. The original CSV is not modified.
 
+## Stage 2: Historical priors and likelihoods
+
+### Visual: where the probabilities come from
+
+```mermaid
+flowchart LR
+    R[Historical rows] --> C[Count rows by is_fraud]
+    C --> P[Prior: state count / all rows]
+    R --> E[Count evidence rows within each state]
+    E --> L[Likelihood: evidence count / state count]
+```
+
+Plain-text version:
+
+```text
+All historical rows
+      |
+      +--> Count LEGITIMATE and FRAUDULENT -> priors
+      |
+      +--> Count evidence within each state -> likelihoods
+```
+
+### Class counts and priors
+
+These are **DATASET-DERIVED**:
+
+| Hidden state | Historical count | Calculation | Prior |
+|---|---:|---|---:|
+| `LEGITIMATE` | 9,849 | `9,849 / 10,000` | `0.984900` |
+| `FRAUDULENT` | 151 | `151 / 10,000` | `0.015100` |
+| **Total** | **10,000** | `9,849 + 151` | **1.000000** |
+
+The prior is our starting belief before looking at transaction evidence. It reflects the class frequency in this historical dataset.
+
+### Likelihoods
+
+Each likelihood is calculated as:
+
+```text
+P(evidence=True | state)
+    = number of rows where evidence is True and state matches
+      / number of rows where state matches
+```
+
+The following values are **DATASET-DERIVED**:
+
+| Evidence | State | True count | State count | `P(True \| State)` | `P(False \| State)` |
+|---|---|---:|---:|---:|---:|
+| `EARLY_HOUR` | `LEGITIMATE` | 2,331 | 9,849 | 0.236674 | 0.763326 |
+| `EARLY_HOUR` | `FRAUDULENT` | 124 | 151 | 0.821192 | 0.178808 |
+| `FOREIGN_TRANSACTION` | `LEGITIMATE` | 896 | 9,849 | 0.090974 | 0.909026 |
+| `FOREIGN_TRANSACTION` | `FRAUDULENT` | 82 | 151 | 0.543046 | 0.456954 |
+| `LOCATION_MISMATCH` | `LEGITIMATE` | 785 | 9,849 | 0.079704 | 0.920296 |
+| `LOCATION_MISMATCH` | `FRAUDULENT` | 72 | 151 | 0.476821 | 0.523179 |
+| `LOW_DEVICE_TRUST` | `LEGITIMATE` | 3,230 | 9,849 | 0.327952 | 0.672048 |
+| `LOW_DEVICE_TRUST` | `FRAUDULENT` | 129 | 151 | 0.854305 | 0.145695 |
+| `HIGH_VELOCITY` | `LEGITIMATE` | 3,178 | 9,849 | 0.322672 | 0.677328 |
+| `HIGH_VELOCITY` | `FRAUDULENT` | 88 | 151 | 0.582781 | 0.417219 |
+
+For example:
+
+```text
+P(FOREIGN_TRANSACTION=True | FRAUDULENT)
+= 82 fraudulent rows with foreign_transaction = 1 / 151 fraudulent rows
+= 82 / 151
+= 0.543046
+```
+
+For false evidence, we use the complement of the true-evidence probability:
+
+```text
+P(FOREIGN_TRANSACTION=False | FRAUDULENT)
+= 1 - P(FOREIGN_TRANSACTION=True | FRAUDULENT)
+= 1 - 0.543046
+= 0.456954
+```
+
+The two values add to 1 for each evidence/state pair. This lets the later Bayesian update handle both `True` and `False` observations.
+
+### Stage 2 verification
+
+```text
+class count sum: 10,000
+prior sum: 1.0
+all likelihoods in [0, 1]: yes
+all true/false complements sum to 1: yes
+```
+
 ## Hidden states
 
 The hidden state is represented by the historical label:
@@ -150,9 +238,6 @@ HIGH_VELOCITY: 3,266 true
 
 ## Not implemented yet
 
-- Class counts and priors
-- Conditional likelihoods
-- Complement likelihoods for false evidence
 - Bayesian posterior updates
 - Decision costs and uncertainty margin
 - Agent action selection

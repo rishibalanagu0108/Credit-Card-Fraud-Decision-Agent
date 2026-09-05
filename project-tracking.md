@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Current stage:** Stage 1 complete; awaiting review
-- **Next stage:** Stage 2 — priors + likelihoods
+- **Current stage:** Stage 2 complete; awaiting review
+- **Next stage:** Stage 3 — Bayesian belief simulation
 - **Required blocker:** None; `data/credit_card_fraud_10k.csv` is present
-- **Implementation started:** Stage 1 only
-- **Stage commits created:** Stage 1 — `f95dc88`
+- **Implementation started:** Stages 1–2
+- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `d7b9af3`
 - **Raw dataset modified:** No
 - **Last updated:** 2026-09-05
 
@@ -70,6 +70,15 @@ Raw CSV -> Evidence -> Historical probabilities -> Belief -> Action -> Evaluatio
 
 At every arrow, the project should preserve enough intermediate values for a beginner to trace one transaction by hand.
 
+### Stage 2 probability map
+
+```text
+9,849 LEGITIMATE rows ──> P(LEGITIMATE) = 9,849 / 10,000 = 0.984900
+  151 FRAUDULENT rows ──> P(FRAUDULENT) =   151 / 10,000 = 0.015100
+
+Evidence count inside each state ──> likelihood P(evidence | state)
+```
+
 ### Stage 1 — Dataset inspection + project definition
 
 **Outcome:** Confirmed the CSV schema, created the five binary evidence definitions in the notebook, and documented hidden states plus selected/excluded columns.
@@ -82,7 +91,7 @@ At every arrow, the project should preserve enough intermediate values for a beg
 
 ### Stage 2 — Priors + likelihoods
 
-**Outcome:** Calculate class counts, priors, and all five conditional likelihood pairs directly from the CSV; verify each probability is in `[0, 1]`.
+**Outcome:** Calculated class counts, priors, and all five conditional likelihood pairs directly from the CSV; verified each probability is in `[0, 1]` and each True/False pair sums to 1.
 
 **Commit:** `derive fraud priors and evidence likelihoods`
 
