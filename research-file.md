@@ -281,6 +281,92 @@ P(FRAUDULENT | both observations) = 0.026044
 
 The final posterior still sums to 1. No action is selected in Stage 3; action selection begins in Stage 4.
 
+## Stage 4: Cost-based decision policy
+
+### Visual: belief becomes an action
+
+```mermaid
+flowchart TD
+    P[Posterior belief] --> A[Expected APPROVE cost]
+    P --> B[Expected BLOCK cost]
+    A --> G[Compare cost gap]
+    B --> G
+    G -->|gap > 0.5| L[Choose lower-cost action]
+    G -->|gap <= 0.5 and evidence remains| E[GET_MORE_EVIDENCE]
+    G -->|gap <= 0.5 and no evidence remains| H[HUMAN_REVIEW]
+```
+
+Plain-text version:
+
+```text
+Posterior belief
+      |
+      +--> APPROVE expected cost
+      |
+      +--> BLOCK expected cost
+                    |
+                    v
+              compare the gap
+              /              \
+       clearly different     too close
+             |                  |
+      lower-cost action    get evidence or
+                           use HUMAN_REVIEW
+```
+
+### Relative cost matrix
+
+These are **DESIGN ASSUMPTIONS**. They are not rupee amounts and are not calculated from the dataset.
+
+| Action | True state: `LEGITIMATE` | True state: `FRAUDULENT` |
+|---|---:|---:|
+| `APPROVE` | 0 | 10 |
+| `BLOCK` | 6 | 0 |
+
+Interpretation:
+
+- APPROVE + LEGITIMATE = 0: correct action.
+- APPROVE + FRAUDULENT = 10: costly fraud miss.
+- BLOCK + LEGITIMATE = 6: genuine transaction is rejected.
+- BLOCK + FRAUDULENT = 0: correct fraud prevention action.
+
+### Expected costs
+
+```text
+EC(APPROVE)
+= P(LEGITIMATE) × 0 + P(FRAUDULENT) × 10
+
+EC(BLOCK)
+= P(LEGITIMATE) × 6 + P(FRAUDULENT) × 0
+```
+
+For the Stage 3 posterior:
+
+```text
+P(LEGITIMATE) = 0.973956
+P(FRAUDULENT) = 0.026044
+
+EC(APPROVE) = 0.026044 × 10 = 0.260444
+EC(BLOCK) = 0.973956 × 6 = 5.843734
+```
+
+Because `0.260444` is lower than `5.843734`, the lower-cost action is `APPROVE`.
+
+### Uncertainty rule
+
+The V1 policy uses this **DESIGN ASSUMPTION**:
+
+```text
+UNCERTAINTY_MARGIN = 0.5 relative-cost units
+```
+
+If the absolute difference between the APPROVE and BLOCK expected costs is at most `0.5`:
+
+- choose `GET_MORE_EVIDENCE` if unused evidence exists;
+- otherwise choose `HUMAN_REVIEW`.
+
+This margin is intentionally simple and deterministic. It is not learned from the dataset.
+
 ## Stage 1 verification output
 
 The following was verified directly from the CSV:
@@ -309,7 +395,6 @@ HIGH_VELOCITY: 3,266 true
 
 ## Not implemented yet
 
-- Decision costs and uncertainty margin
 - Agent action selection
 - Held-out evaluation
 - Failure analysis

@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Current stage:** Stage 3 complete; awaiting review
-- **Next stage:** Stage 4 — decision costs + policy
+- **Current stage:** Stage 4 complete; awaiting review
+- **Next stage:** Stage 5 — complete sequential agent loop
 - **Required blocker:** None; `data/credit_card_fraud_10k.csv` is present
-- **Implementation started:** Stages 1–3
-- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `621e4e9`
+- **Implementation started:** Stages 1–4
+- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `e3b669c`
 - **Raw dataset modified:** No
 - **Last updated:** 2026-09-05
 
@@ -89,6 +89,17 @@ Posterior: LEGITIMATE 0.949491, FRAUDULENT 0.050509
 Posterior: LEGITIMATE 0.973956, FRAUDULENT 0.026044
 ```
 
+### Stage 4 policy map
+
+```text
+Posterior: LEGITIMATE 0.973956, FRAUDULENT 0.026044
+       |
+       +--> EC(APPROVE) = 0.260444
+       +--> EC(BLOCK)   = 5.843734
+       |
+       +--> lower cost: APPROVE
+```
+
 ### Stage 1 — Dataset inspection + project definition
 
 **Outcome:** Confirmed the CSV schema, created the five binary evidence definitions in the notebook, and documented hidden states plus selected/excluded columns.
@@ -117,7 +128,7 @@ Posterior: LEGITIMATE 0.973956, FRAUDULENT 0.026044
 
 ### Stage 4 — Decision costs + policy
 
-**Outcome:** Add the APPROVE/BLOCK relative-cost matrix, expected costs, the documented uncertainty margin, GET_MORE_EVIDENCE, and HUMAN_REVIEW fallback.
+**Outcome:** Added the APPROVE/BLOCK relative-cost matrix, expected costs, the documented uncertainty margin, GET_MORE_EVIDENCE, and HUMAN_REVIEW fallback.
 
 **Commit:** `add credit card fraud decision policy`
 
