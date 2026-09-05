@@ -25,6 +25,31 @@ The hidden state is represented by the historical label:
 
 The label will be hidden while the agent decides and revealed only afterward for evaluation.
 
+### Visual: what the agent can see
+
+```mermaid
+flowchart LR
+    T[Raw transaction] --> E[Five binary evidence flags]
+    T --> H[Historical label: is_fraud]
+    E --> A[Agent observes evidence]
+    H -. hidden during decision .-> A
+    A --> D[Later: evaluate action against true state]
+```
+
+Plain-text version:
+
+```text
+Raw transaction
+      |
+      v
+Five evidence flags  --->  Agent makes a decision
+                                  ^
+                                  |
+                    is_fraud stays hidden until evaluation
+```
+
+The important separation is that `is_fraud` helps us learn historical probabilities, but it is not available to the agent while it is deciding about a new transaction.
+
 ## Selected columns for V1
 
 | Column | Use | Reason |
@@ -58,6 +83,44 @@ These rules are **DESIGN ASSUMPTIONS**. They create binary observations; they ar
 | `HIGH_VELOCITY` | `velocity_last_24h >= 3` | At least 3 recent transactions are recorded in the 24-hour velocity field. |
 
 The exact boundary choices (`<= 5`, `< 50`, and `>= 3`) are V1 design choices. Stage 2 will calculate how often each resulting evidence variable occurs for each historical hidden state.
+
+### Visual: raw columns becoming evidence
+
+```text
+transaction_hour       --(<= 5)-->  EARLY_HOUR
+foreign_transaction    --(== 1)-->  FOREIGN_TRANSACTION
+location_mismatch      --(== 1)-->  LOCATION_MISMATCH
+device_trust_score     --(< 50)-->  LOW_DEVICE_TRUST
+velocity_last_24h      --(>= 3)-->  HIGH_VELOCITY
+```
+
+The arrows above are feature-engineering rules. They do not say how likely fraud is. Stage 2 will estimate those probabilities from rows grouped by `is_fraud`.
+
+### Visual: the Week 1 reasoning pipeline
+
+```mermaid
+flowchart TD
+    S1[1. Inspect data and define evidence] --> S2[2. Calculate priors and likelihoods]
+    S2 --> S3[3. Update belief with Bayes]
+    S3 --> S4[4. Compare expected costs]
+    S4 --> S5[5. Collect evidence sequentially]
+    S5 --> S6[6. Evaluate 50 held-out cases]
+    S6 --> S7[7. Inspect failures]
+    S7 --> S8[8. Record one complete decision]
+```
+
+Plain-text version:
+
+```text
+Inspect data
+    -> Calculate historical probabilities
+    -> Update belief
+    -> Compare decision costs
+    -> Get more evidence when needed
+    -> Evaluate
+    -> Analyze failures
+    -> Record one complete decision
+```
 
 ## Stage 1 verification output
 

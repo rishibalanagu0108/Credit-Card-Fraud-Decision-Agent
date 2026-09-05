@@ -51,6 +51,25 @@ No `paper/`, `social/`, `src/`, or `results/` directories will be created for We
 
 ## Stage plan and freeze boundaries
 
+## Visual project map
+
+```mermaid
+flowchart LR
+    DATA[Raw CSV] --> EVIDENCE[Evidence definitions]
+    EVIDENCE --> PROB[Historical priors and likelihoods]
+    PROB --> BELIEF[Bayesian belief]
+    BELIEF --> POLICY[Cost-based action policy]
+    POLICY --> TEST[Evaluation and failure analysis]
+```
+
+Plain-text version:
+
+```text
+Raw CSV -> Evidence -> Historical probabilities -> Belief -> Action -> Evaluation
+```
+
+At every arrow, the project should preserve enough intermediate values for a beginner to trace one transaction by hand.
+
 ### Stage 1 — Dataset inspection + project definition
 
 **Outcome:** Confirmed the CSV schema, created the five binary evidence definitions in the notebook, and documented hidden states plus selected/excluded columns.
