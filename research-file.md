@@ -367,6 +367,86 @@ If the absolute difference between the APPROVE and BLOCK expected costs is at mo
 
 This margin is intentionally simple and deterministic. It is not learned from the dataset.
 
+## Stage 5: Complete sequential agent loop
+
+### Visual: evidence collection loop
+
+```text
+Transaction without hidden label
+            |
+            v
+Reveal initial evidence
+            |
+            v
+Update posterior -> calculate costs -> choose action
+                                  |
+             +--------------------+--------------------+
+             |                    |                    |
+          APPROVE/BLOCK     GET_MORE_EVIDENCE      HUMAN_REVIEW
+             |                    |                    |
+            stop          reveal next fixed item       stop
+                                  |
+                                  +--> repeat
+```
+
+The fixed V1 evidence order is:
+
+```text
+1. EARLY_HOUR
+2. FOREIGN_TRANSACTION
+3. LOCATION_MISMATCH
+4. LOW_DEVICE_TRUST
+5. HIGH_VELOCITY
+```
+
+The order is a **DESIGN ASSUMPTION**. It is not selected using Expected Information Gain or a learned ranking.
+
+### Supplied example transaction
+
+Raw inputs:
+
+```text
+transaction_hour = 3
+foreign_transaction = 0
+location_mismatch = 1
+device_trust_score = 35
+velocity_last_24h = 1
+```
+
+Derived evidence:
+
+```text
+EARLY_HOUR = True
+FOREIGN_TRANSACTION = False
+LOCATION_MISMATCH = True
+LOW_DEVICE_TRUST = True
+HIGH_VELOCITY = False
+```
+
+Initially, only the first two evidence items are revealed. The agent does not use the hidden `is_fraud` label.
+
+After `EARLY_HOUR=True`:
+
+```text
+Posterior: LEGITIMATE = 0.949491, FRAUDULENT = 0.050509
+EC(APPROVE) = 0.505092
+EC(BLOCK)   = 5.696945
+Action      = APPROVE
+```
+
+After `FOREIGN_TRANSACTION=False`:
+
+```text
+Posterior: LEGITIMATE = 0.973956, FRAUDULENT = 0.026044
+EC(APPROVE) = 0.260444
+EC(BLOCK)   = 5.843734
+Action      = APPROVE
+```
+
+Because the action is already clearly selected after the initial evidence, the loop does not reveal the remaining three evidence items for this example. The raw evidence is known for demonstration, but the agent stops after the evidence it needed.
+
+The hidden label remains unavailable to `evidence_from_transaction()`, `update_belief()`, and `choose_action()`.
+
 ## Stage 1 verification output
 
 The following was verified directly from the CSV:

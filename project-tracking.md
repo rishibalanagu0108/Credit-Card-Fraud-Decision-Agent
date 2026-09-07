@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Current stage:** Stage 4 complete; awaiting review
-- **Next stage:** Stage 5 — complete sequential agent loop
+- **Current stage:** Stage 5 complete; awaiting review
+- **Next stage:** Stage 6 — evaluation
 - **Required blocker:** None; `data/credit_card_fraud_10k.csv` is present
-- **Implementation started:** Stages 1–4
-- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `e3b669c`
+- **Implementation started:** Stages 1–5
+- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `f5c8be0`
 - **Raw dataset modified:** No
 - **Last updated:** 2026-09-05
 
@@ -100,6 +100,26 @@ Posterior: LEGITIMATE 0.973956, FRAUDULENT 0.026044
        +--> lower cost: APPROVE
 ```
 
+### Stage 5 agent-loop map
+
+```text
+Transaction with hidden label
+          |
+          v
+EARLY_HOUR -> FOREIGN_TRANSACTION
+          |
+          v
+Update belief -> calculate costs -> policy action
+                              |
+             +----------------+----------------+
+             |                |                |
+          APPROVE/BLOCK   GET_MORE_EVIDENCE  HUMAN_REVIEW
+             |                |                |
+            stop       reveal next fixed item  stop
+                              |
+                              +--> repeat
+```
+
 ### Stage 1 — Dataset inspection + project definition
 
 **Outcome:** Confirmed the CSV schema, created the five binary evidence definitions in the notebook, and documented hidden states plus selected/excluded columns.
@@ -136,7 +156,7 @@ Posterior: LEGITIMATE 0.973956, FRAUDULENT 0.026044
 
 ### Stage 5 — Complete agent loop
 
-**Outcome:** Start with EARLY_HOUR and FOREIGN_TRANSACTION, reveal remaining evidence in the fixed V1 order, update after every item, and run the supplied example transaction end-to-end.
+**Outcome:** Added the complete sequential loop, initial evidence reveal, fixed additional-evidence order, hidden-label protection, and the supplied example transaction trace.
 
 **Commit:** `add sequential fraud evidence and agent loop`
 
