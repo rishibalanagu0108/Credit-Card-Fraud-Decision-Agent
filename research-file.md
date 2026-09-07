@@ -434,6 +434,8 @@ EC(BLOCK)   = 5.696945
 Action      = APPROVE
 ```
 
+Even though the first action is already `APPROVE`, the loop continues because the V1 contract requires both initial evidence items to be revealed.
+
 After `FOREIGN_TRANSACTION=False`:
 
 ```text

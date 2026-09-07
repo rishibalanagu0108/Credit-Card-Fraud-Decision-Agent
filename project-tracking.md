@@ -7,6 +7,7 @@
 - **Required blocker:** None; `data/credit_card_fraud_10k.csv` is present
 - **Implementation started:** Stages 1–6 policy definitions
 - **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `ca5fae2`; Policy variants — `1b2b476`
+- **Correction commits:** Initial evidence reveal loop fixed in `58f8519`
 - **Raw dataset modified:** No
 - **Last updated:** 2026-09-05
 
