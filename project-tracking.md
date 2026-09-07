@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Current stage:** Stage 7 complete; awaiting review
-- **Next stage:** Stage 8 — probability decision record
+- **Current stage:** Stage 8 complete; awaiting review
+- **Next stage:** Week 1 review and limitation discussion
 - **Required blocker:** None; `data/credit_card_fraud_10k.csv` is present
-- **Implementation started:** Stages 1–7
-- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `ca5fae2`; Policy variants — `2f1099f`; Stage 6 — `0f7ca2c`; Stage 7 — `2990676`
+- **Implementation started:** Stages 1–8
+- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `ca5fae2`; Policy variants — `2f1099f`; Stage 6 — `0f7ca2c`; Stage 7 — `245a139`; Stage 8 — `29e52bc`
 - **Correction commits:** Initial evidence reveal loop fixed in `58f8519`
 - **Raw dataset modified:** No
 - **Last updated:** 2026-09-05
@@ -217,6 +217,21 @@ Wrong action
     +--> document reason from the case
 ```
 
+### Stage 8 probability-record map
+
+```text
+Actual transaction
+      |
+      v
+Prior -> evidence update -> posterior -> expected costs
+                                      |
+                         +------------+------------+
+                         |                         |
+                 GET_MORE_EVIDENCE              final action
+                         |                         |
+                   new posterior          reveal actual state
+```
+
 ### Stage 7 — Failure analysis
 
 **Outcome:** Inspected five actual incorrect decisions from a deterministic 200-row audit slice and documented evidence, posterior, collected evidence, action, true state, error type, and evidence-based likely reason.
@@ -227,7 +242,7 @@ Wrong action
 
 ### Stage 8 — Probability decision record
 
-**Outcome:** Record one uncertain transaction from observation through posterior updates, evidence collection, final action, and post-decision evaluation label.
+**Outcome:** Recorded actual transaction 122 under Policy B from observation through posterior updates, GET_MORE_EVIDENCE, final action, and post-decision evaluation label.
 
 **Commit:** `add fraud probability decision record`
 
