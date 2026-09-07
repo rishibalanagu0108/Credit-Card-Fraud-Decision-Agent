@@ -634,10 +634,34 @@ LOW_DEVICE_TRUST: 3,359 true
 HIGH_VELOCITY: 3,266 true
 ```
 
+## Reddit/community research
+
+This is external community context, not evidence used to calculate the agent's probabilities. No Reddit post was authored by us, and no direct human response to us is claimed.
+
+### Relevant discussions reviewed
+
+1. [r/datascience — Fraud project ideas?](https://www.reddit.com/r/datascience/comments/1bdulmz) — Public replies emphasize class imbalance, confusion matrices, precision/recall, and choosing the false-positive/false-negative trade-off for the domain.
+2. [r/datascience — 0.99 Accuracy?](https://www.reddit.com/r/datascience/comments/135ildh) — Public replies warn that majority-class predictions can make accuracy look high; they also discuss leakage-aware splitting and cost-relevant thresholds.
+3. [r/datascience — Fraud Detection in bank transaction](https://www.reddit.com/r/datascience/comments/d2rlep) — Public replies recommend precision-recall-oriented evaluation and reliable validation for heavily imbalanced fraud data.
+4. [r/CreditCards — CitiBank 100% Failure Rate on Fraud Detection + Apple Pay Issues](https://www.reddit.com/r/CreditCards/comments/1bc25fh) — A customer discussion illustrates the real user friction caused by false positives, declines, and account locks.
+5. [r/learnmachinelearning — Generally, how do you reduce false positive occurrence?](https://www.reddit.com/r/learnmachinelearning/comments/xrlmlt) — Public discussion frames false positives and false negatives as a threshold trade-off rather than a universally correct setting.
+6. [r/MachineLearning — Reproducible research: Machine learning for credit card fraud detection](https://www.reddit.com/r/MachineLearning/comments/n42n15) — The discussion highlights the difficulty of sharing financial data and the value of reproducible code and experiments.
+
+### What this changed in Week 1
+
+The discussions support decisions already made in this project:
+
+- report precision, recall, false positives, false negatives, and cost instead of accuracy alone;
+- keep the cost matrix explicit because error priorities are domain-dependent;
+- retain `HUMAN_REVIEW` as a possible operational fallback;
+- preserve intermediate probabilities and saved predictions for reproducibility;
+- treat the 50-case evaluation as limited evidence because its fraud count is small.
+
+These discussions did not change the dataset-derived priors or likelihoods. They provide external context for evaluation and limitations only.
+
 ## Not implemented yet
 
 - Agent action selection
 - Held-out evaluation
-- Reddit/community research
 
 These will be added only in their assigned stages.
