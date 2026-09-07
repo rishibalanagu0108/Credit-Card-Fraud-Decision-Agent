@@ -498,7 +498,75 @@ EC(BLOCK)   = 0.973956 × 6 = 5.843734
 
 Both policies still choose `APPROVE` for this particular example, but Policy B is more fraud-sensitive because its approval error is twice as costly.
 
-The 50-case comparison and metrics are still pending for the evaluation part of Stage 6.
+The 50-case comparison and metrics are recorded in Stage 6 below.
+
+## Stage 6: 50-case evaluation
+
+### Visual: decision versus evaluation
+
+```text
+Transaction features
+        |
+        v
+Label hidden -> BASELINE / POLICY A / POLICY B make action
+        |
+        v
+Reveal is_fraud only after action
+        |
+        v
+Compare action with actual state -> metrics and cost
+```
+
+The evaluation slice is the final 50 rows of the CSV, selected deterministically with `df.tail(50)`. This is a reproducible decision-time holdout: labels are hidden during each decision, although the historical probability table was derived earlier from the complete dataset.
+
+The selected 50-row slice contains:
+
+```text
+LEGITIMATE: 49
+FRAUDULENT: 1
+```
+
+### Baseline
+
+The baseline counts all five suspicious evidence flags:
+
+```text
+3 or more suspicious flags -> BLOCK
+otherwise -> APPROVE
+```
+
+It does not use Bayesian beliefs, costs, or more evidence.
+
+### Actual evaluation output
+
+The metrics below are **DATASET-DERIVED** from the selected 50 rows:
+
+| Policy | TP | TN | FP | FN | Fraud precision | Fraud recall | Human-review rate | Total decision cost |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `BASELINE` | 1 | 47 | 2 | 0 | 0.333333 | 1.000000 | 0.000000 | 12 |
+| `POLICY_A` | 0 | 49 | 0 | 1 | 0.000000 | 0.000000 | 0.000000 | 10 |
+| `POLICY_B` | 0 | 49 | 0 | 1 | 0.000000 | 0.000000 | 0.000000 | 20 |
+
+Confusion-matrix meaning:
+
+```text
+TP = BLOCK on a fraudulent transaction
+TN = APPROVE on a legitimate transaction
+FP = BLOCK on a legitimate transaction
+FN = APPROVE on a fraudulent transaction
+```
+
+Precision and recall are calculated for automatic APPROVE/BLOCK decisions. Human review is excluded from the automatic confusion-matrix counts and reported separately. No human reviews occurred in this 50-row slice.
+
+The provided matrix has no human-review cost. Therefore, total decision cost sums only APPROVE/BLOCK outcomes. Human-review rate is reported separately rather than assigning an invented monetary cost.
+
+### Saved predictions
+
+The 150 prediction rows (50 cases × 3 policies) are saved at:
+
+`experiments/evaluation_predictions.csv`
+
+The file includes the transaction ID, policy, action, actual state revealed after the decision, posterior when available, and evidence collected.
 
 ## Stage 1 verification output
 

@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Current stage:** Stage 6 policy variants complete; evaluation pending
-- **Next stage:** Stage 6 — 50-case evaluation
+- **Current stage:** Stage 6 complete; awaiting review
+- **Next stage:** Stage 7 — failure analysis
 - **Required blocker:** None; `data/credit_card_fraud_10k.csv` is present
-- **Implementation started:** Stages 1–6 policy definitions
-- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `ca5fae2`; Policy variants — `1b2b476`
+- **Implementation started:** Stages 1–6
+- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `ca5fae2`; Policy variants — `2f1099f`; Stage 6 — `805a814`
 - **Correction commits:** Initial evidence reveal loop fixed in `58f8519`
 - **Raw dataset modified:** No
 - **Last updated:** 2026-09-05
@@ -82,6 +82,24 @@ Same evidence + same posterior
        |             |
        +------v------+
           compare actions
+```
+
+### Stage 6 evaluation map
+
+```text
+50 transactions
+      |
+      +--> hide is_fraud -> BASELINE action
+      +--> hide is_fraud -> POLICY A action
+      +--> hide is_fraud -> POLICY B action
+                                  |
+                                  v
+                       reveal labels after actions
+                                  |
+                                  v
+                   confusion matrix + precision/recall
+                   false positives/negatives + cost
+                   human-review rate
 ```
 
 At every arrow, the project should preserve enough intermediate values for a beginner to trace one transaction by hand.
@@ -180,7 +198,7 @@ Update belief -> calculate costs -> policy action
 
 ### Stage 6 — Evaluation
 
-**Outcome:** Evaluate 50 held-out labeled transactions using the baseline, Policy A, and Policy B; calculate confusion matrix, fraud precision/recall, false positives/negatives, human-review rate, and total decision cost.
+**Outcome:** Evaluated 50 deterministic decision-time holdout transactions using the baseline, Policy A, and Policy B; calculated confusion matrices, fraud precision/recall, false positives/negatives, human-review rate, and total decision cost; saved predictions.
 
 **Commit:** `add fraud policy comparison and evaluation`
 
