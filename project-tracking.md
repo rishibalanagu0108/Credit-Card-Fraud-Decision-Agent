@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Current stage:** Stage 6 complete; awaiting review
-- **Next stage:** Stage 7 — failure analysis
+- **Current stage:** Stage 7 complete; awaiting review
+- **Next stage:** Stage 8 — probability decision record
 - **Required blocker:** None; `data/credit_card_fraud_10k.csv` is present
-- **Implementation started:** Stages 1–6
-- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `ca5fae2`; Policy variants — `2f1099f`; Stage 6 — `805a814`
+- **Implementation started:** Stages 1–7
+- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `ca5fae2`; Policy variants — `2f1099f`; Stage 6 — `0f7ca2c`; Stage 7 — `2990676`
 - **Correction commits:** Initial evidence reveal loop fixed in `58f8519`
 - **Raw dataset modified:** No
 - **Last updated:** 2026-09-05
@@ -204,9 +204,22 @@ Update belief -> calculate costs -> policy action
 
 **Freeze boundary:** Labels are revealed only after each decision for scoring.
 
+### Stage 7 failure-analysis map
+
+```text
+Wrong action
+    |
+    +--> inspect evidence flags
+    +--> inspect collected evidence
+    +--> inspect posterior
+    +--> reveal actual state
+    +--> classify false positive / false negative
+    +--> document reason from the case
+```
+
 ### Stage 7 — Failure analysis
 
-**Outcome:** Inspect at least five actual incorrect decisions and document evidence, posterior, collected evidence, action, true state, error type, and evidence-based likely reason.
+**Outcome:** Inspected five actual incorrect decisions from a deterministic 200-row audit slice and documented evidence, posterior, collected evidence, action, true state, error type, and evidence-based likely reason.
 
 **Commit:** `document fraud agent failure analysis`
 

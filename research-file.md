@@ -568,6 +568,46 @@ The 150 prediction rows (50 cases × 3 policies) are saved at:
 
 The file includes the transaction ID, policy, action, actual state revealed after the decision, posterior when available, and evidence collected.
 
+## Stage 7: Failure analysis
+
+### Visual: how a failure is inspected
+
+```text
+Transaction evidence + collected evidence
+                 |
+                 v
+Posterior and expected-cost action
+                 |
+                 v
+Reveal actual state after decision
+                 |
+                 v
+Compare action with state -> error type -> evidence-based reason
+```
+
+The Stage 6 tail-50 evaluation had only four incorrect policy decisions. To meet the five-case inspection requirement without fabricating errors, the notebook uses a separate deterministic audit slice: `df.head(200)`. The Stage 6 metrics remain unchanged.
+
+The first five actual errors from that audit are:
+
+| Transaction | Policy | Evidence flags (`EARLY`, `FOREIGN`, `LOCATION`, `LOW_DEVICE`, `HIGH_VELOCITY`) | Posterior fraud | Evidence collected | Action | Actual state | Error |
+|---:|---|---|---:|---|---|---|---|
+| 4 | BASELINE | T, F, T, F, T | 0.058946 | all five | BLOCK | LEGITIMATE | False positive |
+| 42 | BASELINE | F, F, T, T, T | 0.048357 | all five | BLOCK | LEGITIMATE | False positive |
+| 46 | BASELINE | T, F, F, T, T | 0.066749 | all five | BLOCK | LEGITIMATE | False positive |
+| 51 | BASELINE | T, F, F, T, T | 0.066749 | all five | BLOCK | LEGITIMATE | False positive |
+| 58 | POLICY_A | F, T, T, T, T | 0.020988 | initial two | APPROVE | FRAUDULENT | False negative |
+
+### Failure reasons grounded in the cases
+
+- Transactions 4, 42, 46, and 51 are baseline false positives. Each has exactly three suspicious flags, so the baseline blocks them. The baseline deliberately treats every flag equally and never uses the historical likelihood strengths. Their actual labels are legitimate.
+- Transaction 58 is a Policy A false negative. Its initial observations are `EARLY_HOUR=False` and `FOREIGN_TRANSACTION=True`. The posterior fraud belief after those two observations is only `0.020988`, so APPROVE has the lower expected cost under Policy A. The later suspicious signals are not collected because the initial decision is already outside the uncertainty margin. The actual label is fraudulent.
+
+The detailed machine-readable records are saved at:
+
+`experiments/failure_analysis.csv`
+
+This analysis shows two distinct limitations: the baseline can overreact to a count of signals, while the Bayesian policy can stop early when the initial evidence and rare-fraud prior make fraud appear unlikely.
+
 ## Stage 1 verification output
 
 The following was verified directly from the CSV:
@@ -598,7 +638,6 @@ HIGH_VELOCITY: 3,266 true
 
 - Agent action selection
 - Held-out evaluation
-- Failure analysis
 - Reddit/community research
 
 These will be added only in their assigned stages.
