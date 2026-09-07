@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Current stage:** Stage 5 complete; awaiting review
-- **Next stage:** Stage 6 — evaluation
+- **Current stage:** Stage 6 policy variants complete; evaluation pending
+- **Next stage:** Stage 6 — 50-case evaluation
 - **Required blocker:** None; `data/credit_card_fraud_10k.csv` is present
-- **Implementation started:** Stages 1–5
-- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `f5c8be0`
+- **Implementation started:** Stages 1–6 policy definitions
+- **Stage commits created:** Stage 1 — `85b4195`; Stage 2 — `92a4098`; Stage 3 — `a89f8a4`; Stage 4 — `8cdfaf8`; Stage 5 — `ca5fae2`; Policy variants — `1b2b476`
 - **Raw dataset modified:** No
 - **Last updated:** 2026-09-05
 
@@ -66,6 +66,21 @@ Plain-text version:
 
 ```text
 Raw CSV -> Evidence -> Historical probabilities -> Belief -> Action -> Evaluation
+```
+
+### Policy comparison map
+
+```text
+Same evidence + same posterior
+              |
+       +------+------+
+       |             |
+    Policy A      Policy B
+    fraud error   fraud error
+    cost = 10     cost = 20
+       |             |
+       +------v------+
+          compare actions
 ```
 
 At every arrow, the project should preserve enough intermediate values for a beginner to trace one transaction by hand.

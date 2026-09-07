@@ -447,6 +447,57 @@ Because the action is already clearly selected after the initial evidence, the l
 
 The hidden label remains unavailable to `evidence_from_transaction()`, `update_belief()`, and `choose_action()`.
 
+## Policy variants for Stage 6
+
+The Bayesian model, evidence rules, evidence order, uncertainty margin, and agent loop are shared by both policies. Only one cost changes.
+
+```text
+Same posterior belief
+        |
+        +--> Policy A costs -> action A
+        |
+        +--> Policy B costs -> action B
+```
+
+### Policy A — V1 default
+
+```text
+                 LEGITIMATE    FRAUDULENT
+APPROVE                0             10
+BLOCK                  6              0
+```
+
+Policy A is the original cost policy implemented in Stage 4.
+
+### Policy B — more fraud-sensitive
+
+```text
+                 LEGITIMATE    FRAUDULENT
+APPROVE                0             20
+BLOCK                  6              0
+```
+
+Policy B changes only the cost of approving a fraudulent transaction from `10` to `20`. This makes the same posterior more expensive to approve, so the lower-cost action may change toward `BLOCK` or the policy may request more evidence. No unrelated threshold is added.
+
+For example, at the Stage 3 posterior:
+
+```text
+P(LEGITIMATE) = 0.973956
+P(FRAUDULENT) = 0.026044
+
+Policy A:
+EC(APPROVE) = 0.026044 × 10 = 0.260444
+EC(BLOCK)   = 0.973956 × 6 = 5.843734
+
+Policy B:
+EC(APPROVE) = 0.026044 × 20 = 0.520888
+EC(BLOCK)   = 0.973956 × 6 = 5.843734
+```
+
+Both policies still choose `APPROVE` for this particular example, but Policy B is more fraud-sensitive because its approval error is twice as costly.
+
+The 50-case comparison and metrics are still pending for the evaluation part of Stage 6.
+
 ## Stage 1 verification output
 
 The following was verified directly from the CSV:
